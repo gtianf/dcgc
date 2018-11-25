@@ -1,29 +1,56 @@
 from django.shortcuts import render,HttpResponse,redirect
 from app01 import models
 import xlrd
-
+import datetime
+from xlrd import xldate_as_tuple
+import os
 # Create your views here.
+count = 0
 def insert_db(file_name):
-	#file = r"D:\kqj\416、DEGC-S0820(36）校准报告.xlsx"
 	book = xlrd.open_workbook(file_name)
-	sheet1 = book.sheet_by_index(1)
-	sheet_name = book.sheet_names()[1]
-	#print(sheet_name)
+	sheet1 = book.sheet_by_index(0)
 	nrows = sheet1.nrows
-	t_list = ["rom_id","intercept","p","p_p","t","t_p","a","b","min_range","max_range","min_temperature","max_temperature","level","g","temperature"]
+	ncol = sheet1.ncols
+	titile = sheet1.row_values(0)
+	global count
 	for i in range(nrows):
-		if i == 0: #如果是表头，则跳过
+		if i == 0: #第一行为标题，跳过
 			continue
-		ncols = sheet1.ncols
-		for n in range(ncols):
-			t_list[n] = sheet1.cell_value(i,n)
-		models.SoftTest.objects.create(intercept=t_list[0],p=t_list[1],p_p=t_list[2],t=t_list[3],t_p=t_list[4],a=t_list[5],b=t_list[6],min_range=t_list[7],max_range=t_list[8],min_temperature=t_list[9],max_temperature=t_list[10],level=t_list[11],g=t_list[12],temperature=t_list[13])
+		row_data = sheet1.row_values(i)#获取excel的每一行
+		for n in range(ncol):
+			if n > 2:#跳过前面固定的三列时间、压力、温度
+				rom_id = titile[n]
+				s_time = xldate_as_tuple(row_data[0],0)
+				time = datetime.datetime(*s_time) #时间格式转换
+				press = row_data[1]
+				temp = row_data[2]
+				data = row_data[n].split() #转换为列表
+				s_volt = int(data[0],16)/16
+				s_press = int(data[2],16) #16进制转换为10进制
+				s_temp = int(data[3],16)
+				s_data = " ".join(data)
+				count = count + 1
+				#插入数据库
+				models.Raw_data.objects.create(rom_id=rom_id,time=time,pressure=press,temperature=temp,s_volt=s_volt,s_press=s_press,s_temp=s_temp,s_data=s_data)
+	return count
 
-# list = os.listdir(r"D:\kqj")
-# for file in list:
-# 	file_name = r"D:\kqj\%s" %file
-# 	insert_db(file_name)
+
+#调用插入函数
 def add_data(request):
-	insert_db(r"D:\kqj\416、DEGC-S0820(36）校准报告.xlsx")
-	return HttpResponse("OK")
+	if request.method == "GET":
+		# acount = insert_db(r"D:\files\417.xlsx")
+		# return HttpResponse(acount)
+		list = os.listdir(r"D:\files")
+		count_list = []
+		for i in list:
+			file_name = os.path.join(r"D:\files", i)
+			print(file_name)
+			acount = insert_db(file_name)
+			count_list.append(acount)
+		return HttpResponse(count_list)
+
+
+def test(request):
+	pass
+
 
