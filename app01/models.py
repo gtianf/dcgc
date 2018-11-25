@@ -19,7 +19,7 @@ from django.db import models
 # 	g = models.CharField(max_length=20)
 # 	temperature = models.IntegerField()
 
-
+#定义源基础数据表
 class Raw_data(models.Model):
 	id = models.AutoField(primary_key=True)
 	rom_id = models.CharField(max_length=30, null=False)
