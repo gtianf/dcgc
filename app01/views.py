@@ -56,26 +56,17 @@ def search(request):
 		rom_id = request.POST.get("rom_id")
 		press = request.POST.get("press")
 		temp = request.POST.get("temp")
-		r_s = ""
-		p_s = ""
-		t_s = ""
+		sql_dict = dict()
 		print(rom_id)
 		if rom_id:
-			r_s = "rom_id=%s," %rom_id
-			print(r_s)
+			sql_dict['rom_id'] = rom_id
 		if press:
-			p_s = "pressure=%s," %press
-			print(p_s)
+			sql_dict['pressure'] = press
 		if temp:
-			t_s = "temperature=%s, " %temp
-			print(t_s)
+			sql_dict['temperature'] = temp
 
-		s_sql = r_s + p_s + t_s
-		print(s_sql)
-		str(s_sql)[:-1]
-		print(s_sql)
 
-		data_obj = models.Raw_data.objects.filter(s_sql)
+		data_obj = models.Raw_data.objects.filter(**sql_dict)
 		return render(request, "data_list.html", {"data": data_obj})
 
 
