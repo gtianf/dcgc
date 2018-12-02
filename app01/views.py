@@ -64,10 +64,11 @@ def search(request):
 			sql_dict['pressure'] = press
 		if temp:
 			sql_dict['temperature'] = temp
-
-
-		data_obj = models.Raw_data.objects.filter(**sql_dict)
-		return render(request, "data_list.html", {"data": data_obj})
+		if sql_dict:
+			data_obj = models.Raw_data.objects.filter(**sql_dict)
+			return render(request, "data_list.html", {"data": data_obj})
+		else:
+			return HttpResponse("必须输入一个查询条件")
 
 
 def test(request):

@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>数据</title>
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap-theme.min.css">
 </head>
 <body>
-<table border="1">
+<div class="container">
+    <table border="1" class="table table-striped">
     <thead>
     <tr>
         <th>序号</th>
@@ -21,10 +23,10 @@
     </thead>
     <tbody>
     {% for i in data %}
-        <tr>
+        <tr >
         <td>{{ forloop.counter }}</td>
         <td>{{ i.rom_id }}</td>
-        <td>{{ i.time }}</td>
+        <td>{{ i.time|date:"Y-m-d H:i:s" }}</td>
         <td>{{ i.pressure }}</td>
         <td>{{ i.temperature }}</td>
         <td>{{ i.s_volt }}</td>
@@ -35,6 +37,8 @@
     {% endfor %}
     </tbody>
 </table>
+</div>
+
 
 </body>
 </html>
