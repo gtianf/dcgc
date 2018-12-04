@@ -45,7 +45,7 @@ def add_data(request):
 			file_name = os.path.join(r"D:\files", i)
 			print(file_name)
 			acount = acount + insert_db(file_name)
-		return HttpResponse("总记录条数：" + count)
+		return HttpResponse("总记录条数：%d" %count)
 
 #根据搜索条件查询数据
 def search(request):
