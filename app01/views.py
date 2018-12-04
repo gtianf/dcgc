@@ -26,12 +26,13 @@ def insert_db(file_name):
 				temp = row_data[2]
 				data = row_data[n].split() #转换为列表
 				s_volt = int(data[0],16)/16
+				volt = round(s_volt,1)
 				s_press = int(data[2],16) #16进制转换为10进制
 				s_temp = int(data[3],16)
 				s_data = " ".join(data)
 				count = count + 1
 				#插入数据库
-				models.Raw_data.objects.create(rom_id=rom_id,time=time,pressure=press,temperature=temp,s_volt=s_volt,s_press=s_press,s_temp=s_temp,s_data=s_data)
+				models.Raw_data.objects.create(rom_id=rom_id,time=time,pressure=press,temperature=temp,s_volt=volt,s_press=s_press,s_temp=s_temp,s_data=s_data)
 	return count
 
 
@@ -39,14 +40,12 @@ def insert_db(file_name):
 def add_data(request):
 	if request.method == "GET":
 		list = os.listdir(r"D:\files")
-		count_list = []
+		acount = 0
 		for i in list:
 			file_name = os.path.join(r"D:\files", i)
 			print(file_name)
-			acount = insert_db(file_name)
-			count_list.append(",")
-			count_list.append(acount)
-		return HttpResponse(count_list)
+			acount = acount + insert_db(file_name)
+		return HttpResponse("总记录条数：" + count)
 
 #根据搜索条件查询数据
 def search(request):

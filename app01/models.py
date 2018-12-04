@@ -26,7 +26,7 @@ class Raw_data(models.Model):
 	time = models.DateTimeField()
 	pressure = models.IntegerField()
 	temperature = models.IntegerField()
-	s_volt = models.IntegerField()
+	s_volt = models.FloatField()
 	s_press = models.IntegerField()
 	s_temp = models.IntegerField()
 	s_data = models.CharField(max_length=30)
