@@ -63,33 +63,47 @@
                 <!-- Default panel contents -->
                 <div class="panel-heading">数据列表 <i class="fa fa-thumb-tack pull-right"></i></div>
                 <div class="panel-body">
-                    <form action="/search/" method="post">
+                    <form action="/search/" method="get">
                         <div class="row" style="margin-bottom: 15px">
                             <div class="col-md-3">
                                 <div class="input-group">
-                                    <input type="text" name="rom_id" class="form-control" placeholder="设备id">
+                                    {% if rom_id %}
+                                        <input type="text" name="rom_id" class="form-control" placeholder="{{ rom_id }}">
+                                    {% else %}
+                                        <input type="text" name="rom_id" class="form-control" placeholder="设备id">
+                                    {% endif %}
+
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="input-group">
-                                    <input type="text" name="press" class="form-control" placeholder="压力">
+                                    {% if press %}
+                                        <input type="text" name="press" class="form-control" placeholder={{ press }}>
+                                    {% else %}
+                                        <input type="text" name="press" class="form-control" placeholder="压力">
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="input-group">
-                                    <input type="text" name="temp" class="form-control" placeholder="温度">
+                                    {% if temp %}
+                                    <input type="text" name="temp" class="form-control" placeholder={{ temp }}>
+                                        {% else %}
+                                        <input type="text" name="temp" class="form-control" placeholder="温度">
+                                    {% endif %}
+
                                     <span class="input-group-btn">
-                                    <button class="btn btn-default" type="submit">搜索</button>
+                                    <button class="btn btn-default" >搜索</button>
                                 </span>
                                 </div><!-- /input-group -->
                             </div><!-- /.col-md-4 -->
                             <div class="col-md-3 pull-right">
-                            <button class="btn btn-success pull-right" data-toggle="modal" data-target="#myModal">新增
-                            </button>
-                        </div>
+                                <button class="btn btn-success pull-right" data-toggle="modal" data-target="#myModal">新增
+                                </button>
+                            </div>
 
-                    </div><!-- /.row -->
- </form>
+                        </div><!-- /.row -->
+                    </form>
                     <table class="table table-bordered">
                         <thead>
                         <tr>
@@ -105,7 +119,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for i in data %}
+                        {% for i in data_list %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ i.rom_id }}</td>
@@ -122,23 +136,34 @@
                     </table>
 
                     <nav aria-label="Page navigation" class="text-right">
-                        <ul class="pagination">
-                            <li>
-                                <a href="#" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <li><a href="#">1</a></li>
-                            <li><a href="#">2</a></li>
-                            <li><a href="#">3</a></li>
-                            <li><a href="#">4</a></li>
-                            <li><a href="#">5</a></li>
-                            <li>
-                                <a href="#" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
+                        {% if data %}
+                            <ul id="pages" class="pagination pagination-sm pagination-xs">
+                                {% if data.first %}
+                                    <li><a href="?page=1">1</a></li>
+                                {% endif %}
+                                {% if data.left %}
+                                    {% if data.left_has_more %}
+                                        <li><span>...</span></li>
+                                    {% endif %}
+                                    {% for i in data.left %}
+                                        <li><a href="?page={{ i }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ i }}</a></li>
+                                    {% endfor %}
+                                {% endif %}
+                                <li class="active"><a href="?page={{ data.page }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ data.page }}</a></li>
+                                {% if data.right %}
+                                    {% for i in data.right %}
+                                        <li><a href="?page={{ i }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ i }}</a></li>
+                                    {% endfor %}
+                                    {% if data.right_has_more %}
+                                        <li><span>...</span></li>
+                                    {% endif %}
+                                {% endif %}
+                                {% if data.last %}
+                                    <li><a href="?page={{ data.total_pages }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ data.total_pages }}</a></li>
+                                {% endif %}
+                            </ul>
+                        {% endif %}
+
                     </nav>
                 </div>
 
@@ -148,43 +173,12 @@
 </div>
 
 
-<div class="modal fade" tabindex="-1" role="dialog" id="myModal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title">用户信息</h4>
-            </div>
-            <div class="modal-body">
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">邮箱</label>
-                        <div class="col-sm-10">
-                            <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="inputPassword3" class="col-sm-2 control-label">密码</label>
-                        <div class="col-sm-10">
-                            <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary">保存</button>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script>
-    
+
 </script>
 <script src="/static/js/jquery-3.3.1.min.js"></script>
 <script src="/static/bootstrap/js/bootstrap.min.js"></script>
