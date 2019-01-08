@@ -2,11 +2,11 @@
 {% extends 'base.html' %}
 {# 把自己的页面内容，塞到母模板里面相应的位置 #}
 {% block page-main %}
-            <h1 class="page-header">数据查询</h1>
+            <h1 class="page-header">导入数据</h1>
 
             <div class="panel panel-primary">
                 <!-- Default panel contents -->
-                <div class="panel-heading">数据列表 <i class="fa fa-thumb-tack pull-right"></i></div>
+                <div class="panel-heading">导入数据 <i class="fa fa-thumb-tack pull-right"></i></div>
                 <div class="panel-body">
                     <form action="/search/" method="get">
                         <div class="row" style="margin-bottom: 15px">
@@ -115,9 +115,10 @@
             </div>
 {% endblock %}
 
-{% block data_list %}
+{% block import_data %}
 active
 {% endblock %}
+
 
 
 

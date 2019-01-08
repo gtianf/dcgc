@@ -120,5 +120,10 @@ def search(request):
 
 def test(request):
 	pass
+def import_data(request):
+	return  render(request,'import_data.html')
+def project_list(request):
+	return render(request, 'project_list.html')
+
 
 

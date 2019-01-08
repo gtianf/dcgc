@@ -20,6 +20,7 @@ from app01 import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^add_data/', views.add_data),
-    url(r'^test/', views.test),
-    url(r'^search/', views.search),
+    url(r'^data_list/', views.search),
+    url(r'^import_data',views.import_data),
+    url(r'^project_list/$', views.project_list),
 ]
