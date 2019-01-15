@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<!-- saved from url=(0042)https://v3.bootcss.com/examples/dashboard/ -->
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="https://v3.bootcss.com/favicon.ico">
+
+    <title>Dashboard</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="/static/bootstrap/css/dashboard.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/fontawesome/css/font-awesome.min.css">
+</head>
+
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://v3.bootcss.com/examples/dashboard/#">BMS-S10</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="https://v3.bootcss.com/examples/dashboard/#">Dashboard</a></li>
+                <li><a href="https://v3.bootcss.com/examples/dashboard/#">Settings</a></li>
+                <li><a href="https://v3.bootcss.com/examples/dashboard/#">Profile</a></li>
+                <li><a href="https://v3.bootcss.com/examples/dashboard/#">Help</a></li>
+            </ul>
+            <form class="navbar-form navbar-right">
+                <input type="text" class="form-control" placeholder="Search...">
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li><a href="/publisher_list/">设备列表页</a></li>
+                <li class="active"><a href="/book_list/">数据列表</a></li>
+                <li><a href="/author_list/">工程列表</a></li>
+            </ul>
+
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">数据查询</h1>
+
+            <div class="panel panel-primary">
+                <!-- Default panel contents -->
+                <div class="panel-heading">数据列表 <i class="fa fa-thumb-tack pull-right"></i></div>
+                <div class="panel-body">
+                    <form action="/search/" method="get">
+                        <div class="row" style="margin-bottom: 15px">
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    {% if rom_id %}
+                                        <input type="text" name="rom_id" class="form-control" placeholder="{{ rom_id }}">
+                                    {% else %}
+                                        <input type="text" name="rom_id" class="form-control" placeholder="设备id">
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    {% if press %}
+                                        <input type="text" name="press" class="form-control" placeholder={{ press }}>
+                                    {% else %}
+                                        <input type="text" name="press" class="form-control" placeholder="压力">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    {% if temp %}
+                                    <input type="text" name="temp" class="form-control" placeholder={{ temp }}>
+                                        {% else %}
+                                        <input type="text" name="temp" class="form-control" placeholder="温度">
+                                    {% endif %}
+
+                                    <span class="input-group-btn">
+                                    <button class="btn btn-default" >搜索</button>
+                                </span>
+                                </div><!-- /input-group -->
+                            </div><!-- /.col-md-4 -->
+                            <div class="col-md-3 pull-right">
+                                <button class="btn btn-success pull-right" data-toggle="modal" data-target="#myModal">新增
+                                </button>
+                            </div>
+
+                        </div><!-- /.row -->
+                    </form>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>设备id</th>
+                            <th>时间</th>
+                            <th>压力</th>
+                            <th>温度</th>
+                            <th>传感器电压</th>
+                            <th>传感器压力</th>
+                            <th>传感器温度</th>
+                            <th>原始编码</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i in data_list %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ i.rom_id }}</td>
+                                <td>{{ i.time|date:"Y-m-d H:i:s" }}</td>
+                                <td>{{ i.pressure }}</td>
+                                <td>{{ i.temperature }}</td>
+                                <td>{{ i.s_volt }}</td>
+                                <td>{{ i.s_press }}</td>
+                                <td>{{ i.s_temp }}</td>
+                                <td>{{ i.s_data }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <nav aria-label="Page navigation" class="text-right">
+                        {% if data %}
+                            <ul id="pages" class="pagination pagination-sm pagination-xs">
+                                {% if data.first %}
+                                    <li><a href="?page=1&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">1</a></li>
+                                {% endif %}
+                                {% if data.left %}
+                                    {% if data.left_has_more %}
+                                        <li><span>...</span></li>
+                                    {% endif %}
+                                    {% for i in data.left %}
+                                        <li><a href="?page={{ i }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ i }}</a></li>
+                                    {% endfor %}
+                                {% endif %}
+                                <li class="active"><a href="?page={{ data.page }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ data.page }}</a></li>
+                                {% if data.right %}
+                                    {% for i in data.right %}
+                                        <li><a href="?page={{ i }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ i }}</a></li>
+                                    {% endfor %}
+                                    {% if data.right_has_more %}
+                                        <li><span>...</span></li>
+                                    {% endif %}
+                                {% endif %}
+                                {% if data.last %}
+                                    <li><a href="?page={{ data.total_pages }}&rom_id={{ rom_id }}&press={{ press }}&temp={{ temp }}">{{ data.total_pages }}</a></li>
+                                {% endif %}
+                            </ul>
+                        {% endif %}
+
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script>
+
+</script>
+<script src="/static/js/jquery-3.3.1.min.js"></script>
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+
+</body>
+</html>
