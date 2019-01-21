@@ -5,15 +5,18 @@ from django.db import models
 
 #定义源基础数据表
 class Raw_data(models.Model):
-	id = models.AutoField(primary_key=True)
-	rom_id = models.CharField(max_length=30, null=False)
-	time = models.DateTimeField()
-	pressure = models.IntegerField()
-	temperature = models.IntegerField()
-	s_volt = models.FloatField()
-	s_press = models.IntegerField()
-	s_temp = models.IntegerField()
-	s_data = models.CharField(max_length=30)
+    id = models.AutoField(primary_key=True)
+    rom_id = models.CharField(max_length=30, null=False)
+    time = models.DateTimeField()
+    pressure = models.IntegerField()
+    temperature = models.IntegerField()
+    s_volt = models.FloatField()
+    s_press = models.IntegerField()
+    p_p = models.IntegerField()
+    s_temp = models.IntegerField()
+    p_t = models.IntegerField()
+    t_t = models.BigIntegerField()
+    s_data = models.CharField(max_length=30)
 
 #对原有数据表进行关联
 class Corectedsurveydata(models.Model):

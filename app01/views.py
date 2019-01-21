@@ -29,11 +29,15 @@ def insert_db(file_name):
 				s_volt = int(data[0],16)/16
 				volt = round(s_volt,1)
 				s_press = int(data[2],16) #16进制转换为10进制
+				p_p = pow(s_press,2)
 				s_temp = int(data[3],16)
+				p_t = s_press * s_temp
+				t_t = pow(s_temp,2)
+				print(t_t)
 				s_data = " ".join(data)
 				count = count + 1
 				#插入数据库
-				models.Raw_data.objects.create(rom_id=rom_id,time=time,pressure=press,temperature=temp,s_volt=volt,s_press=s_press,s_temp=s_temp,s_data=s_data)
+				models.Raw_data.objects.create(rom_id=rom_id,time=time,pressure=press,temperature=temp,s_volt=volt,s_press=s_press,p_p=p_p,s_temp=s_temp,p_t=p_t,t_t=t_t,s_data=s_data)
 	return count
 
 
