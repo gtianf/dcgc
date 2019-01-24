@@ -13,12 +13,12 @@ def insert_db(file_name):
 	nrows = sheet1.nrows
 	ncol = sheet1.ncols
 	titile = sheet1.row_values(0)
-	global count
+	global count#定义导入记录的行数
 	for i in range(nrows):
 		if i == 0: #第一行为标题，跳过
 			continue
 		row_data = sheet1.row_values(i)#获取excel的每一行
-		for n in range(ncol):
+		for n in range(ncol): #对每一行的列进行循环
 			if n > 2:#跳过前面固定的三列时间、压力、温度
 				rom_id = titile[n]
 				s_time = xldate_as_tuple(row_data[0],0)
@@ -26,7 +26,7 @@ def insert_db(file_name):
 				press = row_data[1]
 				temp = row_data[2]
 				data = row_data[n].split() #转换为列表
-				s_volt = int(data[0],16)/16
+				#s_volt = int(data[0],16)/16 去掉电压
 				volt = round(s_volt,1)
 				s_press = int(data[2],16) #16进制转换为10进制
 				p_p = pow(s_press,2)
@@ -37,7 +37,7 @@ def insert_db(file_name):
 				s_data = " ".join(data)
 				count = count + 1
 				#插入数据库
-				models.Raw_data.objects.create(rom_id=rom_id,time=time,pressure=press,temperature=temp,s_volt=volt,s_press=s_press,p_p=p_p,s_temp=s_temp,p_t=p_t,t_t=t_t,s_data=s_data)
+				models.Raw_data.objects.create(rom_id=rom_id, time=time, pressure=press, temperature=temp, s_press=s_press, p_p=p_p, s_temp=s_temp, p_t=p_t, t_t=t_t, s_data=s_data)
 	return count
 
 

@@ -6,17 +6,18 @@ from django.db import models
 #定义源基础数据表
 class Raw_data(models.Model):
     id = models.AutoField(primary_key=True)
+    time = models.DateTimeField(null=False)
     rom_id = models.CharField(max_length=30, null=False)
-    time = models.DateTimeField()
     pressure = models.IntegerField()
     temperature = models.IntegerField()
-    s_volt = models.FloatField()
+    s_data = models.CharField(max_length=30)
+   # s_volt = models.FloatField() 去掉电压
     s_press = models.IntegerField()
     p_p = models.IntegerField()
     s_temp = models.IntegerField()
     p_t = models.IntegerField()
     t_t = models.BigIntegerField()
-    s_data = models.CharField(max_length=30)
+
 
 #对原有数据表进行关联
 class Corectedsurveydata(models.Model):
@@ -28,7 +29,7 @@ class Corectedsurveydata(models.Model):
     isvalid = models.IntegerField(db_column='IsValid', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'corectedsurveydata'
 
 
@@ -43,7 +44,7 @@ class Datadescription(models.Model):
     operatorid = models.TextField(db_column='OperatorID', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'datadescription'
 
 
@@ -53,7 +54,7 @@ class DjangoMigrations(models.Model):
     applied = models.DateTimeField()
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'django_migrations'
 
 
@@ -63,7 +64,7 @@ class Grades(models.Model):
     gradedescription = models.CharField(db_column='GradeDescription', max_length=200, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'grades'
 
 
@@ -83,7 +84,7 @@ class Levelmetercoefficient(models.Model):
     stdtemperature = models.FloatField(db_column='StdTemperature', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'levelmetercoefficient'
 
 
@@ -93,7 +94,7 @@ class Memberprojectrole(models.Model):
     projectid = models.IntegerField(db_column='ProjectId', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'memberprojectrole'
 
 
@@ -103,7 +104,7 @@ class Memberrole(models.Model):
     roleid = models.IntegerField(db_column='RoleId', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'memberrole'
 
 
@@ -117,7 +118,7 @@ class Members(models.Model):
     isvalid = models.IntegerField(db_column='IsValid', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'members'
 
 
@@ -134,7 +135,7 @@ class NAnglepoint(models.Model):
     visible = models.IntegerField(db_column='Visible', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'n_anglepoint'
 
 
@@ -150,7 +151,7 @@ class NDatarevised(models.Model):
     isvalid = models.IntegerField(db_column='IsValid', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'n_datarevised'
 
 
@@ -161,7 +162,7 @@ class NLineaext(models.Model):
     beta = models.FloatField(db_column='Beta', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'n_lineaext'
 
 
@@ -171,7 +172,7 @@ class NLinesext(models.Model):
     g = models.FloatField(db_column='G', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'n_linesext'
 
 
@@ -185,7 +186,7 @@ class NSurveyline(models.Model):
     linestatus = models.CharField(db_column='LineStatus', max_length=20, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'n_surveyline'
 
 
@@ -197,7 +198,7 @@ class Plcregister(models.Model):
     receivetime = models.DateTimeField(db_column='ReceiveTime', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'plcregister'
 
 
@@ -213,7 +214,7 @@ class Projecttree(models.Model):
     visible = models.IntegerField(db_column='Visible', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'projecttree'
 
 
@@ -225,7 +226,7 @@ class Ranges(models.Model):
     rangetype = models.IntegerField(db_column='RangeType', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'ranges'
 
 
@@ -242,7 +243,7 @@ class Relevance(models.Model):
     operatorid = models.IntegerField(db_column='OperatorID', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'relevance'
 
 
@@ -252,7 +253,7 @@ class Role(models.Model):
     remarks = models.CharField(db_column='Remarks', max_length=500, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'role'
 
 
@@ -266,7 +267,7 @@ class Settlementdata(models.Model):
     isvalid = models.IntegerField(db_column='IsValid', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'settlementdata'
 
 
@@ -284,7 +285,7 @@ class Surveydatas(models.Model):
     remarks = models.CharField(db_column='Remarks', max_length=5000, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'surveydatas'
 
 
@@ -301,7 +302,7 @@ class Surveylines(models.Model):
     linestatus = models.IntegerField(db_column='LineStatus', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'surveylines'
 
 
@@ -316,7 +317,7 @@ class Surveypoints(models.Model):
     visible = models.IntegerField(db_column='Visible', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'surveypoints'
 
 
@@ -330,7 +331,7 @@ class Surveyrod(models.Model):
     rodstatus = models.IntegerField(db_column='RodStatus', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'surveyrod'
 
 
@@ -344,5 +345,5 @@ class Userlogin(models.Model):
     browser = models.CharField(db_column='Browser', max_length=100, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
-        managed = True
+        managed = False
         db_table = 'userlogin'
