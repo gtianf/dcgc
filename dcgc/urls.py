@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^data_list/', views.search),
     url(r'^import_data',views.import_data),
     url(r'^project_list/$', views.project_list),
+    url(r'^regist_data/', views.regist_data),
 ]

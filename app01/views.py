@@ -4,7 +4,16 @@ import xlrd
 import datetime
 from xlrd import xldate_as_tuple
 import os
+import time
 from django.core.paginator import Paginator
+import numpy as np
+from sklearn import linear_model,metrics
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sqlalchemy import create_engine
 # Create your views here.
 count = 0
 def insert_db(file_name):
@@ -21,23 +30,27 @@ def insert_db(file_name):
 		for n in range(ncol): #对每一行的列进行循环
 			if n > 2:#跳过前面固定的三列时间、压力、温度
 				rom_id = titile[n]
-				s_time = xldate_as_tuple(row_data[0],0)
-				time = datetime.datetime(*s_time) #时间格式转换
-				press = row_data[1]
-				temp = row_data[2]
+				if isinstance(row_data[0], str):
+					time = row_data[0].replace('/', '-')
+				else:
+					s_time = xldate_as_tuple(row_data[0],0)
+					time = datetime.datetime(*s_time) #时间格式转换
+				standard_p = int(row_data[1])
+				standard_t = int(float(row_data[2]))
 				data = row_data[n].split() #转换为列表
-				#s_volt = int(data[0],16)/16 去掉电压
-				volt = round(s_volt,1)
-				s_press = int(data[2],16) #16进制转换为10进制
-				p_p = pow(s_press,2)
-				s_temp = int(data[3],16)
-				p_t = s_press * s_temp
-				t_t = pow(s_temp,2)
-				print(t_t)
-				s_data = " ".join(data)
+				u = int(data[3],16) #16进制转换为10进制
+				uu = pow(u,2)
+				t = int(data[2],16)
+				ut = u * t
+				tt = pow(t,2)
+				#下面获取不带后缀文件名，作为批次号码
+				(filepath, tempfilename) = os.path.split(file_name)
+				(shotname, extension) = os.path.splitext(tempfilename)
+				sn = shotname
+				raw_code = " ".join(data)
 				count = count + 1
 				#插入数据库
-				models.Raw_data.objects.create(rom_id=rom_id, time=time, pressure=press, temperature=temp, s_press=s_press, p_p=p_p, s_temp=s_temp, p_t=p_t, t_t=t_t, s_data=s_data)
+				models.Raw_data.objects.create(rom_id=rom_id, time=time, standard_p=standard_p, standard_t=standard_t, u=u, uu=uu, t=t, ut=ut, tt=tt, raw_code=raw_code, sn=sn)
 	return count
 
 
@@ -47,6 +60,12 @@ def add_data(request):
 		list = os.listdir(r"D:\files")
 		acount = 0
 		for i in list:
+			(shotname, extension) = os.path.splitext(i)
+			sn = shotname
+			#如果数据库中存在该sn，则跳过不导入
+			if_exist = models.Raw_data.objects.filter(sn=sn)
+			if if_exist:
+				continue
 			file_name = os.path.join(r"D:\files", i)
 			print(file_name)
 			acount = acount + insert_db(file_name)
@@ -121,7 +140,142 @@ def search(request):
 			data = {}
 			return render(request, "data_list.html", context={"data_list": data_list, 'data': data})
 
-
+#把求解的系数写入数据库
+def regist_data(request):
+	engine = create_engine('mysql+pymysql://gtianf:123456.@localhost:3306/dcgc')
+	if request.method == "GET":
+		rom_id = request.GET.get("rom_id")
+		if rom_id:
+			if rom_id == 'all':
+				s = ""
+				rom_ids = models.Raw_data.objects.values_list('rom_id',flat=True).distinct()
+				for myid in rom_ids:
+					record = models.Tt_coefficient.objects.filter(rom_id=myid)
+					# 判断库中是否存在该记录,如果没有则进行计算参数，并导入
+					if not record:
+						sql = 'select standard_p,standard_t,u,uu,t,ut,tt from app01_raw_data where rom_id="%s"'%(myid)
+						data = pd.read_sql_query(sql, engine)
+						###针对压力多元回归,带t^2###
+						# 选择需要回归的自变量
+						u_cols = ['u', 'uu', 't', 'ut', 'tt']
+						X = data[u_cols]
+						# 需要回归的因变量
+						Y = data['standard_p']
+						X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0, random_state=1)
+						linreg = LinearRegression()
+						model = linreg.fit(X_train, Y_train)
+						# 获取截距
+						a0 = linreg.intercept_
+						# 获取系数
+						a1, a2, a3, a4, a5 = linreg.coef_
+						# 把x值带入系数求解y值
+						test_set = linreg.predict(X)
+						# 获取残差列表
+						ck_list = Y - test_set
+						# 平均值
+						mean = np.mean(ck_list)
+						# 中位数
+						median = np.median(ck_list)
+						# 方差
+						var = np.var(ck_list)
+						# 标准差
+						std = np.std(ck_list)
+						#如果标准差大于1，则存在异常数据，需要进行处理,并标记为不合格
+						if std > 1:
+							flag = False
+							print('带t*t存在异常数据，异常ROM_ID为%s'%(myid))
+						else:
+							flag = True
+						# 协方差
+						cov = np.cov(ck_list)
+						# 最大值
+						max = np.max(ck_list)
+						# 最小值
+						min = np.min(ck_list)
+						# 获取拟合度
+						score = linreg.score(X, Y)
+						#根据误差情况，对产品进行分级
+						percent = (np.sum(ck_list > 0.5) + np.sum(ck_list < -0.5)) / len(list(ck_list))
+						if percent <= 0.1:
+							level = 1
+						elif percent > 0.1 and percent <= 0.2:
+							level = 2
+						elif percent > 0.2 and percent <= 0.3:
+							level = 3
+						elif percent > 0.3:
+							level = 0
+						#针对温度回归
+						t_cols = ['t']
+						Xt = data[t_cols]
+						Yt = data['standard_t']
+						Xt_train, Xt_test, Yt_train, Yt_test = train_test_split(Xt, Yt, test_size=0, random_state=1)
+						t_linreg = LinearRegression()
+						model = t_linreg.fit(Xt_train, Yt_train)
+						# 获取截距
+						a = t_linreg.intercept_
+						# 获取系数
+						b = t_linreg.coef_[0]
+						# 把残差相关，写入数据库
+						#把系数写入数据库
+						models.Tt_coefficient.objects.create(rom_id=myid, a0=round(a0,16), a1=round(a1,16), a2=round(a2,16), a3=round(a3,16), a4=round(a4,16), a5=round(a5,16), a=round(a,16), b=round(b,16),\
+						mean=mean, median=median, var=var, std=std, cov=cov,max=max, min=min, score=score, level=level,flag=flag)
+						s = s + '<h3>设备ID=%s</h3><br> a1=%.16f,a2=%.16f,a3=%.16f,a4=%.16f,a5=%.16f,a=%.16f,b=%.16f <br>' %(myid,a1, a2, a3, a4, a5, a, b)
+						### 针对压力多元回归,不带t^2 ###
+						# 选择需要回归的自变量
+						u_cols = ['u', 'uu', 't', 'ut']
+						X = data[u_cols]
+						# 需要回归的因变量
+						Y = data['standard_p']
+						X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0, random_state=1)
+						linreg = LinearRegression()
+						model = linreg.fit(X_train, Y_train)
+						# 获取截距
+						a0 = linreg.intercept_
+						# 获取系数
+						a1, a2, a3, a4 = linreg.coef_
+						# 把x值带入系数求解y值
+						test_set = linreg.predict(X)
+						# 获取残差列表
+						ck_list = Y - test_set
+						# 平均值
+						mean = np.mean(ck_list)
+						# 中位数
+						median = np.median(ck_list)
+						# 方差
+						var = np.var(ck_list)
+						# 标准差
+						std = np.std(ck_list)
+						# 如果标准差大于1，则存在异常数据，需要进行处理
+						if std > 1:
+							flag = False
+							print('不带t*t存在异常数据，异常ROM_ID为%s' %(myid))
+						else:
+							flag = True
+						# 协方差
+						cov = np.cov(ck_list)
+						# 最大值
+						max = np.max(ck_list)
+						# 最小值
+						min = np.min(ck_list)
+						# 获取拟合度
+						score = linreg.score(X, Y)
+						#根据残差，对产品进行分级
+						percent = (np.sum(ck_list > 0.5) + np.sum(ck_list < -0.5)) / len(list(ck_list))
+						if percent <= 0.1:
+							level = 1
+						elif percent > 0.1 and percent <= 0.2:
+							level = 2
+						elif percent > 0.2 and percent <= 0.3:
+							level = 3
+						elif percent > 0.3:
+							level = 0
+						# 把残差相关，写入数据库
+						models.Coefficient.objects.create(rom_id=myid, a0=round(a0, 16), a1=round(a1, 16), a2=round(a2, 16), a3=round(a3, 16),a4=round(a4, 16), a=round(a, 16), b=round(b, 16),\
+						mean=mean, median=median, var=var,std=std, cov=cov, max=max, min=min, score=score, level=level, flag=flag)
+						s = s + '不带t*t的系数 <br> a1=%.16f,a2=%.16f,a3=%.16f,a4=%.16f,,a=%.16f,b=%.16f' % (a1, a2, a3, a4, a, b)
+			return HttpResponse(s)
+		else:
+			return HttpResponse("没有传入设备ID")
 def test(request):
 	pass
 def import_data(request):
